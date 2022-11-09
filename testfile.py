@@ -23,12 +23,13 @@ class Vertex:
 
     def __str__(self):
         res = ""
+        itter = 0
         for i in range(len(self.edges) + 1):
-            if self.id == self.edges[i].dest:
-                i -= 1
+            if self.id == i:
                 res += "X \t"
             else:
-                res += f"{str(self.edges[i])}\t"
+                res += f"{str(self.edges[itter])}\t"
+                itter += 1
 
         return res + "\n"
 
