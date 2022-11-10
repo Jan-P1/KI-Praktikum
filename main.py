@@ -1,4 +1,4 @@
-
+import xml.etree.ElementTree as ET
 
 class Graph:
     def __init__(self, vertices, name, source, description) -> None:
@@ -41,10 +41,21 @@ class Edge:
     def __str__(self):
         return str(self.value)
 
-newEdge1 = Edge(1, 1)
-newEdge2 = Edge(0, 1)
-newVertex1 = Vertex(0, [newEdge1])
-newVertex2 = Vertex(1, [newEdge2])
+def initXML(filename):
+    print(filename)
+    tree = ET.parse("src/" + filename)
+    root = tree.getroot()
 
-newGraph = Graph([newVertex1, newVertex2], "Jan", "Okan", "Beide behindert")
-print(newGraph)
+    print(root[0].text)
+
+# Main Function (Entry point)
+if __name__ == "__main__":
+    initXML("br17.xml")
+
+    newEdge1 = Edge(1, 1)
+    newEdge2 = Edge(0, 1)
+    newVertex1 = Vertex(0, [newEdge1])
+    newVertex2 = Vertex(1, [newEdge2])
+
+    newGraph = Graph([newVertex1, newVertex2], "Jan", "Okan", "Beide behindert")
+    print(newGraph)
