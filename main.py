@@ -44,6 +44,10 @@ class Graph:
         strVertex = ""
         for i, value in enumerate(self.vertices):
             res += f"{i:<{longestNum}}"
+            if i < 10:
+                strVertex += "  "
+            elif i < 100:
+                strVertex += " "
             strVertex += f"V{i}:\t{str(value)}"
 
         return res + "\n" + strVertex
