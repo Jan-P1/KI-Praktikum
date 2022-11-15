@@ -104,6 +104,7 @@ class Client:
             self.calculate_weight()
     
     def __str__(self) -> str:
+        totalWeight = 0
         res = "########################################################\nStops in Graph\n"
         for i in self.stops:
             res += f"{i}\t"
@@ -111,7 +112,8 @@ class Client:
 
         for i in self.weights:
             res += f"{i}\t"
-        res += "\n"
+            totalWeight += i
+        res += f"\nTotal weight\n{totalWeight}\n"
 
         return res
 
