@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 import random
 import time
-import math
 longestNum = 0
 
 class Edge:
@@ -23,11 +22,11 @@ class Vertex:
         iteration = 0
         for i in range(len(self.edges) + 1):
             if self.id == i:
-                res += "X\t\t"
+                x = "X"
+                res += f"{x:<{longestNum}}"
             else:
                 length = len(f"{str(self.edges[iteration])}")
-                res += f"{str(self.edges[iteration])}"
-                res += "\t" * (math.floor(longestNum / 4) - math.floor(length / 4) + 1)
+                res += f"{str(self.edges[iteration]):<{longestNum}}"
                 iteration += 1
 
         return res + "\n"
@@ -44,12 +43,7 @@ class Graph:
         res = f"Name: {self.name}\nSource: {self.source}\nDescription: {self.description}\nVertex\t"
         strVertex = ""
         for i, value in enumerate(self.vertices):
-            res += f"{i}"
-            res += "\t" * (math.floor(longestNum / 4) + 1)
-            if i < 10:
-                strVertex += "  "
-            elif i < 100:
-                strVertex += " "
+            res += f"{i:<{longestNum}}"
             strVertex += f"V{i}:\t{str(value)}"
 
         return res + "\n" + strVertex
@@ -75,7 +69,7 @@ def initXML(filename) -> Graph:
         vertEdges = []
         for edge in vert:
             # TODO bs check depends on construction of xml data and should be changed but not sure how yet
-            length = len(str(float(edge.attrib.get('cost'))))
+            length = len(str(float(edge.attrib.get('cost')))) + 1
             if float(edge.attrib.get('cost')) < 9990.0:
                 vertEdges.append(Edge(int(edge.text), float(edge.attrib.get('cost'))))
             if length > longestNum:
@@ -170,6 +164,8 @@ class Client:
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
+
+    print(longestNum)
 
     test_client = Client(br17)
     print(test_client)
