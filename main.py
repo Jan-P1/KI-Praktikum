@@ -1,7 +1,11 @@
 import xml.etree.ElementTree as ET
 import random
 import time
+
+from typing import List
+
 longestNum = 0
+
 
 class Edge:
     def __init__(self, dest, value) -> None:
@@ -11,10 +15,17 @@ class Edge:
     def __str__(self):
         return str(self.value)
 
+
 class Vertex:
-    def __init__(self, id, edges: list[Edge]) -> None:
+    def __init__(self, id, edges: List[Edge]) -> None:
         self.id = id
         self.edges = edges
+
+    def __setitem__(self, key, value):
+        self.edges
+
+    def __getitem__(self, item):
+        return self.edges
 
     def __str__(self):
         global longestNum
@@ -31,8 +42,9 @@ class Vertex:
 
         return res + "\n"
 
+
 class Graph:
-    def __init__(self, vertices: list[Vertex], name, source, description) -> None:
+    def __init__(self, vertices: List[Vertex], name, source, description) -> None:
         self.vertices = vertices
         self.name = name
         self.source = source
@@ -94,7 +106,7 @@ def initXML(filename) -> Graph:
 
 
 class Client:
-    def __init__(self, graph: Graph, stops = []) -> None:
+    def __init__(self, graph: Graph, stops=[]) -> None:
         self.graph = graph
         self.stops = []
         self.weights = []
@@ -102,7 +114,7 @@ class Client:
             self.initialize_random()
         else:
             self.calculate_weight()
-    
+
     def __str__(self) -> str:
         totalWeight = 0
         res = "########################################################\nStops in Graph\n"
@@ -120,7 +132,7 @@ class Client:
     def initialize_random(self):
         for _ in self.graph.vertices:
             is_duplicate = True
-            while(is_duplicate):
+            while (is_duplicate):
                 new_random_vertex = random.randint(0, len(self.graph.vertices) - 1)
                 if new_random_vertex not in self.stops:
                     self.stops.append(new_random_vertex)
@@ -156,7 +168,7 @@ class Client:
         else:
             # TODO Mutations Logic
             pass
-    
+
     def variation(self):
         if not self.completed():
             return
@@ -165,12 +177,13 @@ class Client:
             pass
 
 
-
 # Main Function (Entry point)
 if __name__ == "__main__":
+    a280 = initXML("a280.xml")
+    print(a280)
+
     br17 = initXML("br17.xml")
     print(br17)
-
     print(longestNum)
 
     test_client = Client(br17)
