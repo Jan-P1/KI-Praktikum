@@ -192,3 +192,4 @@ if __name__ == "__main__":
     # Wer lust hat, kann das ja mal ausprobieren xD
     # a280 = initXML("a280.xml")
     # print(a280)
+    # test obs klapt <- pls ignore
