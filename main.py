@@ -110,11 +110,15 @@ def initXML(filename) -> Graph:
 
 
 class Client:
-    def __init__(self, graph: Graph, stops=[]) -> None:
+    def __init__(self, graph: Graph, stops=[], weighting = -1.0) -> None:
         self.stops = []
         self.weights = []
+        self.weighting = weighting
         if len(stops) == 0:
-            self.initialize_random(graph)
+            if weighting != -1:
+                self.initialize_weighted(graph)
+            else:
+                self.initialize_greedy(graph)
         else:
             self.calculate_weight(graph)
 
@@ -132,7 +136,7 @@ class Client:
 
         return res
 
-    def initialize_random(self, graph: Graph):
+    def initialize_greedy(self, graph: Graph):
         # Get random start point
         next_vertex = random.randint(0, len(graph.vertices) - 1)
 
@@ -158,6 +162,40 @@ class Client:
         # Add the takeback move
         self.stops.append(self.stops[0])
         self.calculate_weight(graph)
+
+    # Idee 1 umsetzung
+    def initialize_weighted(self, graph: Graph):
+        def get_weight(edge: Edge):
+            return edge.value
+
+        def get_available_edges(edges: list[Edge]):
+            res = []
+            for i in edges:
+                if i.dest not in self.stops:
+                    res.append(i)
+            return res
+
+        # Get random start point
+        next_vertex = random.randint(0, len(graph.vertices) - 1)
+
+        # Add first vertex
+        self.stops.append(next_vertex)
+        # Loop to get all vertices
+        for _ in range(len(graph.vertices) - 1):
+            available_edges = get_available_edges(graph.vertices[next_vertex].edges)
+            available_edges.sort(key=get_weight)
+
+            # TODO Pick with idea 1 logic and override next_vertex
+
+            self.stops.append(next_vertex)
+
+        # Add the takeback move
+        self.stops.append(self.stops[0])
+        self.calculate_weight(graph)
+
+
+
+
 
     def calculate_weight(self, graph: Graph):
         self.weights.clear()
