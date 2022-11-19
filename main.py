@@ -6,6 +6,10 @@ from typing import List
 
 longestNum = 0
 
+# Adjustable parameters
+MUTATIONS = 1
+POP_SIZE = 20
+
 
 class Edge:
     def __init__(self, dest, value) -> None:
@@ -107,6 +111,7 @@ def initXML(filename) -> Graph:
 
 class Client:
     def __init__(self, graph: Graph, stops=[]) -> None:
+        # Ich glaube, es wäre um einiges effizienter, wenn der graph nicht in den Clients gespeichert wird
         self.graph = graph
         self.stops = []
         self.weights = []
@@ -166,8 +171,22 @@ class Client:
         if not self.completed():
             return
         else:
-            # TODO Mutations Logic
-            pass
+            # Mutate by switching 2 verts in the list
+            counter = 0
+            while counter < MUTATIONS:
+                counter += 1
+                length = len(self.stops)
+                rand1 = random.randint(1, length - 2)
+                rand2 = 0
+                while rand2 == 0 or rand2 == rand1:
+                    rand2 = random.randint(1, length - 2)
+
+                temp = self.stops[rand1]
+                self.stops[rand1] = self.stops[rand2]
+                self.stops[rand2] = temp
+                self.calculate_weight()
+            return
+
 
     def variation(self):
         if not self.completed():
@@ -175,6 +194,24 @@ class Client:
         else:
             # TODO Variation Logic
             pass
+
+
+class Population:
+    def __init__(self):
+        self.clients = []
+        for x in range(POP_SIZE):
+            temp = Client()
+            temp.initialize_random()
+            self.clients.append(temp)
+
+        self.topDog = self.fittest()
+
+    def fittest(self):
+        self.topDog = self.clients[0]
+        for x in self.clients:
+            if x.calculate_weight() < self.topDog.calculate_weight():
+                self.topDog = x
+        return
 
 
 # Main Function (Entry point)
