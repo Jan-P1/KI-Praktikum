@@ -198,6 +198,7 @@ class Client:
 
 class Population:
     def __init__(self):
+        self.topDog = None
         self.clients = []
         for x in range(POP_SIZE):
             temp = Client()
