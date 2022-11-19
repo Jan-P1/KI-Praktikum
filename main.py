@@ -217,17 +217,9 @@ class Population:
 
 # Main Function (Entry point)
 if __name__ == "__main__":
-    a280 = initXML("a280.xml")
-    print(a280)
-
     br17 = initXML("br17.xml")
     print(br17)
     print(longestNum)
 
     test_client = Client(br17)
     print(test_client)
-
-    # Wer lust hat, kann das ja mal ausprobieren xD
-    # a280 = initXML("a280.xml")
-    # print(a280)
-    # test obs klapt <- pls ignore
