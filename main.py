@@ -132,18 +132,34 @@ class Client:
 
         return res
 
-    def initialize_random(self, graph):
-        for _ in graph.vertices:
-            is_duplicate = True
-            while (is_duplicate):
-                new_random_vertex = random.randint(0, len(graph.vertices) - 1)
-                if new_random_vertex not in self.stops:
-                    self.stops.append(new_random_vertex)
-                    is_duplicate = False
+    def initialize_random(self, graph: Graph):
+        # Get random start point
+        next_vertex = random.randint(0, len(graph.vertices) - 1)
+
+        # Add first vertex
+        self.stops.append(next_vertex)
+        # Loop to get all vertices
+        for _ in range(len(graph.vertices) - 1):
+            # Find a 0 weight edge or the best
+            lowest_edge_weight = 10000000000000000
+            best_dest = -1
+            for i in graph.vertices[next_vertex].edges:
+                if i.dest not in self.stops:
+                    if i.value <= 0.0:
+                        next_vertex = i.dest
+                        break
+                    else:
+                        if lowest_edge_weight > i.value:
+                            lowest_edge_weight = i.value
+                            next_vertex = i.dest
+            # Add the best found edge
+            self.stops.append(next_vertex)
+
+        # Add the takeback move
         self.stops.append(self.stops[0])
         self.calculate_weight(graph)
 
-    def calculate_weight(self, graph):
+    def calculate_weight(self, graph: Graph):
         self.weights.clear()
         # Loop all stops to get new weight
         for i in range(len(self.stops)):
