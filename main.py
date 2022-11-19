@@ -111,14 +111,12 @@ def initXML(filename) -> Graph:
 
 class Client:
     def __init__(self, graph: Graph, stops=[]) -> None:
-        # Ich glaube, es wäre um einiges effizienter, wenn der graph nicht in den Clients gespeichert wird
-        self.graph = graph
         self.stops = []
         self.weights = []
         if len(stops) == 0:
-            self.initialize_random()
+            self.initialize_random(graph)
         else:
-            self.calculate_weight()
+            self.calculate_weight(graph)
 
     def __str__(self) -> str:
         totalWeight = 0
@@ -134,32 +132,32 @@ class Client:
 
         return res
 
-    def initialize_random(self):
-        for _ in self.graph.vertices:
+    def initialize_random(self, graph):
+        for _ in graph.vertices:
             is_duplicate = True
             while (is_duplicate):
-                new_random_vertex = random.randint(0, len(self.graph.vertices) - 1)
+                new_random_vertex = random.randint(0, len(graph.vertices) - 1)
                 if new_random_vertex not in self.stops:
                     self.stops.append(new_random_vertex)
                     is_duplicate = False
         self.stops.append(self.stops[0])
-        self.calculate_weight()
+        self.calculate_weight(graph)
 
-    def calculate_weight(self):
+    def calculate_weight(self, graph):
         self.weights.clear()
         # Loop all stops to get new weight
         for i in range(len(self.stops)):
             # Prevent list out of bound while looping stops list and trying to access next stop
             if not (len(self.weights) > 1 and self.stops[i] is self.stops[0]):
                 # Loop all vertex edges and find the correct next one and add the wight in between
-                source = self.graph.vertices[self.stops[i]]
+                source = graph.vertices[self.stops[i]]
                 for e in source.edges:
                     if self.stops[i + 1] is e.dest:
                         self.weights.append(e.value)
                         break
 
     def completed(self) -> bool:
-        if len(self.graph) == len(self.stops):
+        if len(self.stops) != 0:
             return True
         else:
             return False
@@ -186,7 +184,6 @@ class Client:
                 self.stops[rand2] = temp
                 self.calculate_weight()
             return
-
 
     def variation(self):
         if not self.completed():
