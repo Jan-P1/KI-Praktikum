@@ -204,7 +204,7 @@ class Population:
             temp.initialize_random()
             self.clients.append(temp)
 
-        self.topDog = self.fittest()
+        self.fittest()
 
     def fittest(self):
         self.topDog = self.clients[0]
