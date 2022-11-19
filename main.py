@@ -110,13 +110,17 @@ def initXML(filename) -> Graph:
 
 
 class Client:
-    def __init__(self, graph: Graph, stops=[], weighting = -1.0) -> None:
+    def __init__(self, graph: Graph, stops=[], weighting = -1.0, selecter = -1, revers = False) -> None:
         self.stops = []
         self.weights = []
         self.weighting = weighting
+        self.selecter = selecter
+        self.reverse = revers
         if len(stops) == 0:
             if weighting != -1:
                 self.initialize_weighted(graph)
+            elif selecter != -1:
+                self.initialize_selecter(graph)
             else:
                 self.initialize_greedy(graph)
         else:
@@ -193,9 +197,38 @@ class Client:
         self.stops.append(self.stops[0])
         self.calculate_weight(graph)
 
+    # Idee 1 umsetzung
+    def initialize_selecter(self, graph: Graph):
+        def get_weight(edge: Edge):
+            return edge.value
 
+        def get_available_edges(edges):
+            res = []
+            for i in edges:
+                if i.dest not in self.stops:
+                    res.append(i)
+            return res
 
+        # Get random start point
+        next_vertex = random.randint(0, len(graph.vertices) - 1)
 
+        # Add first vertex
+        self.stops.append(next_vertex)
+        # Loop to get all vertices
+        for _ in range(len(graph.vertices) - 1):
+            available_edges: list[Edge] = get_available_edges(graph.vertices[next_vertex].edges)
+            available_edges.sort(key=get_weight, reverse=self.reverse)
+
+            if self.selecter > len(available_edges):
+                next_vertex = available_edges[-1].dest
+            else:
+                next_vertex = available_edges[self.selecter - 1].dest
+
+            self.stops.append(next_vertex)
+
+        # Add the takeback move
+        self.stops.append(self.stops[0])
+        self.calculate_weight(graph)
 
     def calculate_weight(self, graph: Graph):
         self.weights.clear()
@@ -270,7 +303,6 @@ class Population:
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
-    print(longestNum)
 
-    test_client = Client(br17)
+    test_client = Client(br17, selecter=3)
     print(test_client)
