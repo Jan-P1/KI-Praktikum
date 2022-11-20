@@ -9,6 +9,8 @@ longestNum = 0
 # Adjustable parameters
 MUTATIONS = 1
 POP_SIZE = 20
+GENERATIONS = 5
+SURVIVORS = 5
 
 
 class Edge:
@@ -139,6 +141,11 @@ class Client:
         res += f"\nTotal weight\n{totalWeight}\n"
 
         return res
+
+    def initialize_inherited(self, start_vertex):
+        self.stops.append(start_vertex)
+        # TODO: rebuild initializations besides greedy to take a client with preset start point from inheritance
+        # TODO: Call selected travel strategy from here
 
     def initialize_greedy(self, graph: Graph):
         # Get random start point
@@ -272,6 +279,7 @@ class Client:
                 self.calculate_weight()
             return
 
+
     def variation(self):
         if not self.completed():
             return
@@ -280,29 +288,68 @@ class Client:
             pass
 
 
+def sort_filter(e):
+    return e.completed_weight
+
+
 class Population:
-    def __init__(self):
-        self.topDog = None
+    def __init__(self, graph: Graph):
+        self.current_generation = 1
+        self.top_dog = None
         self.clients = []
         for x in range(POP_SIZE):
-            temp = Client()
-            temp.initialize_random()
+            temp = Client(graph)
+            temp.initialize_greedy(graph)
             self.clients.append(temp)
 
         self.fittest()
 
     def fittest(self):
-        self.topDog = self.clients[0]
+        self.top_dog = self.clients[0]
         for x in self.clients:
-            if x.calculate_weight() < self.topDog.calculate_weight():
-                self.topDog = x
+            if x.completed_weight() < self.top_dog.completed_weight():
+                self.top_dog = x
+        print(f"Fittest Client: {self.top_dog.completed_weight()}")
         return
+
+    # Selection based on highest fitness (lowest weight)
+    def selection(self):
+        surviors = []
+        self.clients.sort(key=sort_filter)
+        for x in range(SURVIVORS):
+            surviors.append(self.clients[x])
+
+        return surviors
+
+    # Initialize new generation by killing all unfit Clients,
+    # repopulating with start points randomly selected from the path of the survivors
+    def new_gen(self):
+        self.current_generation += 1
+        self.clients = self.selection()
+        missing_pop = POP_SIZE - len(self.clients)
+        for x in self.clients:
+            x.mutation()
+
+        genes = []
+        i = 0
+
+        while len(genes) < missing_pop:
+            i += 1
+            if i == len(self.clients):
+                i = 0
+            rand = random.randint(0, len(self.clients[i].stops))
+            genes.append(self.clients[i].stops[rand])
+
+        for x in genes:
+            temp = Client(br17)  # TODO: Find better way to feed graph to new Clients
+            temp.initialize_inherited(x)
+            # Too sleepy and I've had a headache all day. Good luck Julian :)
 
 
 # Main Function (Entry point)
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
-
+    fam = Population(br17)
     test_client = Client(br17, selecter=3)
     print(test_client)
