@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import random
 import time
-import copy
+
 
 from typing import List
 
@@ -290,8 +290,8 @@ class Population:
         self.top_dog = None
         self.clients = []
         for x in range(POP_SIZE):
-            temp = Client(graph)
-            temp.initialize_greedy(graph)
+            temp = Client(graph, weighting=random.random())
+            temp.initialize_weighted(graph)
             self.clients.append(temp)
 
         self.fittest()
@@ -346,19 +346,23 @@ class Population:
         self.clients = self.selection()
         missing_pop = POP_SIZE - len(self.clients)
         self.mutation()
-        genes = []
-        i = 0
 
-        while len(genes) < missing_pop:
-            i += 1
+        while POP_SIZE > len(self.clients):
             if i == len(self.clients):
                 i = 0
-            rand = random.randint(0, len(self.clients[i].stops))
-            genes.append(self.clients[i].stops[rand])
+            mom = self.clients[random.randint(0, len(self.clients))]
+            dad = self.clients[random.randint(0, len(self.clients))]
 
-        for x in genes:
-            temp = Client(self.graph)
-            temp.initialize_weighted(x)
+            new_weighing = mom.weighting + dad.weighting
+            if(mom.totalWeight < dad.totalWeight):
+                new_weighing += mom.weighting
+            else:
+                new_weighing += dad.weighting
+
+            new_weighing /= 3
+            temp = Client(self.graph, weighting=new_weighing)
+            temp.initialize_weighted(self.graph)
+            self.clients.append(temp)
 
         print(self)
 
@@ -367,7 +371,6 @@ class Population:
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
-    # fam = Population(br17)
-    # print(fam)
+    fam = Population(br17)
     test_client = Client(br17, weighting=0.07)
     print(test_client)
