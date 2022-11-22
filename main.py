@@ -128,9 +128,10 @@ class Client:
                 self.initialize_greedy(graph)
         else:
             self.calculate_weight(graph)
+        self.totalWeight = self.completed_weight()
+
 
     def __str__(self) -> str:
-        totalWeight = 0
         res = "########################################################\nStops in Graph\n"
         for i in self.stops:
             res += f"{i}\t"
@@ -138,15 +139,11 @@ class Client:
 
         for i in self.weights:
             res += f"{i}\t"
-            totalWeight += i
-        res += f"\nTotal weight\n{totalWeight}\n"
+            self.totalWeight += i
+        res += f"\nTotal weight\n{self.totalWeight}\n"
 
         return res
 
-    def initialize_inherited(self, start_vertex):
-        self.stops.append(start_vertex)
-        # TODO: rebuild initializations besides greedy to take a client with preset start point from inheritance
-        # TODO: Call selected travel strategy from here
 
     def initialize_greedy(self, graph: Graph):
         # Get random start point
@@ -295,7 +292,7 @@ class Client:
                 temp = self.stops[rand1]
                 self.stops[rand1] = self.stops[rand2]
                 self.stops[rand2] = temp
-                self.calculate_weight()
+                self.calculate_weight(# TODO)
             return
 
 
@@ -307,12 +304,13 @@ class Client:
             pass
 
 
-def sort_filter(e):
-    return e.completed_weight
+def sort_filter(c: Client):
+    return c.totalWeight
 
 
 class Population:
     def __init__(self, graph: Graph):
+        self.graph = graph
         self.current_generation = 1
         self.top_dog = None
         self.clients = []
@@ -322,13 +320,22 @@ class Population:
             self.clients.append(temp)
 
         self.fittest()
+        print(self)
+
+        while self.current_generation < GENERATIONS:
+            self.new_gen()
+
+    def __str__(self):
+        res = f"Generation: {self.current_generation}\n\n"
+        res += f"Fittest individual:\n{self.top_dog}\n"
+        return res
+
 
     def fittest(self):
         self.top_dog = self.clients[0]
         for x in self.clients:
             if x.completed_weight() < self.top_dog.completed_weight():
                 self.top_dog = x
-        print(f"Fittest Client: {self.top_dog.completed_weight()}")
         return
 
     # Selection based on highest fitness (lowest weight)
@@ -360,9 +367,10 @@ class Population:
             genes.append(self.clients[i].stops[rand])
 
         for x in genes:
-            temp = Client(br17)  # TODO: Find better way to feed graph to new Clients
+            temp = Client(self.graph)
             temp.initialize_inherited(x)
-            # Too sleepy and I've had a headache all day. Good luck Julian :)
+
+        print(self)
 
 
 # Main Function (Entry point)
@@ -370,5 +378,6 @@ if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
     fam = Population(br17)
+    print(fam)
     test_client = Client(br17, weighting=0.02)
     print(test_client)
