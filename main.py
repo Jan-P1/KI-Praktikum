@@ -291,7 +291,6 @@ class Population:
         self.clients = []
         for x in range(POP_SIZE):
             temp = Client(graph, weighting=random.random())
-            temp.initialize_weighted(graph)
             self.clients.append(temp)
 
         self.fittest()
@@ -348,20 +347,17 @@ class Population:
         self.mutation()
 
         while POP_SIZE > len(self.clients):
-            if i == len(self.clients):
-                i = 0
-            mom = self.clients[random.randint(0, len(self.clients))]
-            dad = self.clients[random.randint(0, len(self.clients))]
+            mom = self.clients[random.randint(0, len(self.clients)-1)]
+            dad = self.clients[random.randint(0, len(self.clients)-1)]
 
             new_weighing = mom.weighting + dad.weighting
-            if(mom.totalWeight < dad.totalWeight):
+            if mom.totalWeight < dad.totalWeight:
                 new_weighing += mom.weighting
             else:
                 new_weighing += dad.weighting
 
             new_weighing /= 3
             temp = Client(self.graph, weighting=new_weighing)
-            temp.initialize_weighted(self.graph)
             self.clients.append(temp)
 
         print(self)
@@ -372,5 +368,6 @@ if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
     fam = Population(br17)
-    test_client = Client(br17, weighting=0.07)
-    print(test_client)
+    print(fam)
+    #test_client = Client(br17, weighting=0.07)
+    #print(test_client)
