@@ -8,10 +8,10 @@ from typing import List
 longestNum = 0
 
 # Adjustable parameters
-MUTATIONS = 1
-POP_SIZE = 20
-GENERATIONS = 5
-SURVIVORS = 5
+MUTATIONS = 2
+POP_SIZE = 100
+GENERATIONS = 500
+SURVIVORS = 20
 
 
 class Edge:
@@ -114,6 +114,7 @@ def initXML(filename) -> Graph:
 
 class Client:
     def __init__(self, graph: Graph, stops=[], weighting = -1.0, selecter = -1, revers = False) -> None:
+        self.totalWeight = None
         self.stops = []
         self.weights = []
         self.weighting = weighting
@@ -128,8 +129,7 @@ class Client:
                 self.initialize_greedy(graph)
         else:
             self.calculate_weight(graph)
-        self.totalWeight = self.completed_weight()
-
+        self.completed_weight()
 
     def __str__(self) -> str:
         res = "########################################################\nStops in Graph\n"
@@ -144,7 +144,6 @@ class Client:
         res += f"\nTotal weight\n{self.totalWeight}\n"
 
         return res
-
 
     def initialize_greedy(self, graph: Graph):
         # Get random start point
@@ -212,7 +211,6 @@ class Client:
 
             self.stops.append(next_vertex)
 
-
         # Add the takeback move
         self.stops.append(self.stops[0])
         self.calculate_weight(graph)
@@ -269,8 +267,8 @@ class Client:
         else:
             return False
 
-    def completed_weight(self) -> int:
-        return sum(self.weights)
+    def completed_weight(self):
+        self.totalWeight = sum(self.weights)
 
     def variation(self):
         if not self.completed():
@@ -286,9 +284,10 @@ def sort_filter(c: Client):
 
 class Population:
     def __init__(self, graph: Graph):
+        t0 = time.time()
+        self.top_dog: Client
         self.graph = graph
         self.current_generation = 1
-        self.top_dog: Client
         self.clients = []
         for x in range(POP_SIZE):
             temp = Client(graph, weighting=random.random())
@@ -296,6 +295,9 @@ class Population:
 
         self.fittest()
         self.bestVal = self.top_dog.totalWeight
+        t1 = time.time()
+        self.gen_time = t1 - t0
+        self.totalTime = 0
         print(self)
 
         while self.current_generation < GENERATIONS:
@@ -303,15 +305,21 @@ class Population:
 
     def __str__(self):
         res = f"Generation: {self.current_generation}\n\n"
-        res += f"Fittest individual:\n{self.top_dog}\n"
-        res += f"Best Value: {self.bestVal}\n"
+        res += f"Time required for generation: \033[91m{self.gen_time}\033[00m\n\n"
+        res += f"Survivors of this generation\n_________________________________________________________\n\n"
+        res += f"Fittest individual:\n\033[92m{self.top_dog}\033[00m\n\n"
+        if SURVIVORS > 1:
+            res += "Others:\n"
+            for i in range(SURVIVORS - 1):
+                res += f"\033[93m{self.clients[i]}\033[00m\n"
+        res += f"Best Value of this population: \033[94m{self.bestVal}\033[00m\n\n"
         return res
 
 
     def fittest(self):
         self.top_dog = self.clients[0]
         for x in self.clients:
-            if x.completed_weight() < self.top_dog.completed_weight():
+            if x.totalWeight < self.top_dog.totalWeight:
                 self.top_dog = x
         return
 
@@ -339,11 +347,13 @@ class Population:
                 c.stops[rand1] = c.stops[rand2]
                 c.stops[rand2] = temp
                 c.calculate_weight(self.graph)
+                c.completed_weight()
                 counter += 1
 
     # Initialize new generation by killing all unfit Clients,
     # repopulating with start points randomly selected from the path of the survivors
     def new_gen(self):
+        t0 = time.time()
         self.current_generation += 1
         self.clients = self.selection()
         self.mutation()
@@ -365,15 +375,13 @@ class Population:
         self.fittest()
         if self.top_dog.totalWeight < self.bestVal:
             self.bestVal = self.top_dog.totalWeight
-
+        t1 = time.time()
         print(self)
-
 
 # Main Function (Entry point)
 if __name__ == "__main__":
-    br17 = initXML("br17.xml")
+    br17 = initXML("burma14.xml")
     print(br17)
-    fam = Population(br17)
-    print(fam)
+    Population(br17)
     #test_client = Client(br17, weighting=0.07)
     #print(test_client)
