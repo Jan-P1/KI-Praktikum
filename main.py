@@ -275,25 +275,6 @@ class Client:
     def completed_weight(self) -> int:
         return sum(self.weights)
 
-    def mutation(self):
-        if not self.completed():
-            return
-        else:
-            # Mutate by switching 2 verts in the list
-            counter = 0
-            while counter < MUTATIONS:
-                counter += 1
-                length = len(self.stops)
-                rand1 = random.randint(1, length - 2)
-                rand2 = 0
-                while rand2 == 0 or rand2 == rand1:
-                    rand2 = random.randint(1, length - 2)
-
-                temp = self.stops[rand1]
-                self.stops[rand1] = self.stops[rand2]
-                self.stops[rand2] = temp
-                self.calculate_weight(# TODO)
-            return
 
 
     def variation(self):
@@ -347,15 +328,30 @@ class Population:
 
         return surviors
 
+    def mutation(self):
+        # Mutate by switching 2 verts in the list
+        for c in self.clients:
+            counter = 0
+            while counter < MUTATIONS:
+                counter += 1
+                length = len(c.stops)
+                rand1 = random.randint(1, length - 2)
+                rand2 = 0
+                while rand2 == 0 or rand2 == rand1:
+                    rand2 = random.randint(1, length - 2)
+
+                temp = c.stops[rand1]
+                c.stops[rand1] = c.stops[rand2]
+                c.stops[rand2] = temp
+                c.calculate_weight(self.graph)
+
     # Initialize new generation by killing all unfit Clients,
     # repopulating with start points randomly selected from the path of the survivors
     def new_gen(self):
         self.current_generation += 1
         self.clients = self.selection()
         missing_pop = POP_SIZE - len(self.clients)
-        for x in self.clients:
-            x.mutation()
-
+        self.mutation()
         genes = []
         i = 0
 
@@ -368,7 +364,7 @@ class Population:
 
         for x in genes:
             temp = Client(self.graph)
-            temp.initialize_inherited(x)
+            temp.initialize_weighted(x)
 
         print(self)
 
