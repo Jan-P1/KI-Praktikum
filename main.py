@@ -137,6 +137,7 @@ class Client:
             res += f"{i}\t"
         res += "\nWeight in between\n"
 
+        self.totalWeight = 0
         for i in self.weights:
             res += f"{i}\t"
             self.totalWeight += i
@@ -287,13 +288,14 @@ class Population:
     def __init__(self, graph: Graph):
         self.graph = graph
         self.current_generation = 1
-        self.top_dog = None
+        self.top_dog: Client
         self.clients = []
         for x in range(POP_SIZE):
             temp = Client(graph, weighting=random.random())
             self.clients.append(temp)
 
         self.fittest()
+        self.bestVal = self.top_dog.totalWeight
         print(self)
 
         while self.current_generation < GENERATIONS:
@@ -302,6 +304,7 @@ class Population:
     def __str__(self):
         res = f"Generation: {self.current_generation}\n\n"
         res += f"Fittest individual:\n{self.top_dog}\n"
+        res += f"Best Value: {self.bestVal}\n"
         return res
 
 
@@ -326,7 +329,6 @@ class Population:
         for c in self.clients:
             counter = 0
             while counter < MUTATIONS:
-                counter += 1
                 length = len(c.stops)
                 rand1 = random.randint(1, length - 2)
                 rand2 = 0
@@ -337,13 +339,13 @@ class Population:
                 c.stops[rand1] = c.stops[rand2]
                 c.stops[rand2] = temp
                 c.calculate_weight(self.graph)
+                counter += 1
 
     # Initialize new generation by killing all unfit Clients,
     # repopulating with start points randomly selected from the path of the survivors
     def new_gen(self):
         self.current_generation += 1
         self.clients = self.selection()
-        missing_pop = POP_SIZE - len(self.clients)
         self.mutation()
 
         while POP_SIZE > len(self.clients):
@@ -359,6 +361,10 @@ class Population:
             new_weighing /= 3
             temp = Client(self.graph, weighting=new_weighing)
             self.clients.append(temp)
+
+        self.fittest()
+        if self.top_dog.totalWeight < self.bestVal:
+            self.bestVal = self.top_dog.totalWeight
 
         print(self)
 
