@@ -191,23 +191,19 @@ class Client:
         self.stops.append(next_vertex)
         # Loop to get all vertices
         for _ in range(len(graph.vertices) - 1):
-            available_edges: list[Edge] = copy.deepcopy(graph.vertices[next_vertex].edges)
-            available_edges = get_available_edges(available_edges)
+            available_edges = get_available_edges(graph.vertices[next_vertex].edges)
             available_edges.sort(key=get_weight)
 
-            max_weight = available_edges[-1].value
-            if max_weight != 0:
-                for i in available_edges:
-                    i.value = i.value / max_weight
+            compare_weight = available_edges[-1].value * self.weighting
 
             lowest_distance_edge: Edge = None
             for i in available_edges:
-                if i.value == self.weighting:
+                if i.value == compare_weight:
                     next_vertex = i.dest
                     lowest_distance_edge = None
                     break
                 else:
-                    if lowest_distance_edge is None or abs(self.weighting-i.value) < abs(self.weighting-lowest_distance_edge.value):
+                    if lowest_distance_edge is None or abs(compare_weight-i.value) < abs(compare_weight-lowest_distance_edge.value):
                         lowest_distance_edge = i
 
             if lowest_distance_edge is not None:
@@ -274,8 +270,6 @@ class Client:
 
     def completed_weight(self) -> int:
         return sum(self.weights)
-
-
 
     def variation(self):
         if not self.completed():
@@ -373,7 +367,7 @@ class Population:
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
-    fam = Population(br17)
-    print(fam)
-    test_client = Client(br17, weighting=0.02)
+    # fam = Population(br17)
+    # print(fam)
+    test_client = Client(br17, weighting=0.07)
     print(test_client)
