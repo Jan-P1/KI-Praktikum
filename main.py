@@ -11,7 +11,7 @@ longestNum = 0
 MUTATIONS = 2
 POP_SIZE = 100
 GENERATIONS = 50
-SURVIVORS = 20
+SURVIVORS = 1
 
 
 class Edge:
@@ -305,7 +305,7 @@ class Population:
 
     def __str__(self):
         res = f"Generation: {self.current_generation}\n\n"
-        res += f"Time required for generation: \033[91m{self.gen_time}\033[00m\n\n"
+        res += f"Time required for generation: \033[91m{self.gen_time} ms\033[00m\n\n"
         res += f"Survivors of this generation\n_________________________________________________________\n\n"
         res += f"Fittest individual:\n\033[92m{self.top_dog}\033[00m\n\n"
         if SURVIVORS > 1:
@@ -360,19 +360,22 @@ class Population:
 
         while POP_SIZE > len(self.clients):
             new_weighing: float
-            mom = self.clients[random.randint(0, len(self.clients)-1)]
-            if len(self.clients) < 2:
-                dad = self.clients[random.randint(0, len(self.clients)-1)]
+            if len(self.clients) > 0:
+                mom = self.clients[random.randint(0, len(self.clients)-1)]
+                if len(self.clients) == 1:
+                    dad = self.clients[random.randint(0, len(self.clients)-1)]
 
-                new_weighing = mom.weighting + dad.weighting
-                if mom.totalWeight < dad.totalWeight:
-                    new_weighing += mom.weighting
+                    new_weighing = mom.weighting + dad.weighting
+                    if mom.totalWeight < dad.totalWeight:
+                        new_weighing += mom.weighting
+                    else:
+                        new_weighing += dad.weighting
                 else:
-                    new_weighing += dad.weighting
-            else:
-                new_weighing = mom.weighting * 2 + random.random()
+                    new_weighing = mom.weighting * 2 + random.random()
 
-            new_weighing /= 3
+                new_weighing /= 3
+            else:
+                new_weighing = random.random()
             temp = Client(self.graph, weighting=new_weighing)
             self.clients.append(temp)
 
@@ -387,5 +390,4 @@ if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
     Population(br17)
-    #test_client = Client(br17, weighting=0.07)
-    #print(test_client)
+
