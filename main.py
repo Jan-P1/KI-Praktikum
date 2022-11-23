@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
 import random
 import time
-
+import networkx as nx
+import matplotlib.pyplot as plt
 
 from typing import List
 
@@ -9,9 +10,9 @@ longestNum = 0
 
 # Adjustable parameters
 MUTATIONS = 2
-POP_SIZE = 100
-GENERATIONS = 50
-SURVIVORS = 20
+POP_SIZE = 10
+GENERATIONS = 5
+SURVIVORS = 5
 
 
 class Edge:
@@ -144,6 +145,30 @@ class Client:
         res += f"\nTotal weight\n{self.totalWeight}\n"
 
         return res
+
+    def show_graph(self, graph: Graph):
+        G=nx.Graph()
+
+        for i, vertex in enumerate(graph.vertices):
+            G.add_node(i)
+
+        
+        for i, vertex in enumerate(graph.vertices):
+            for edge in vertex.edges:
+                G.add_edge(i, edge.dest,color='#78D1FA', weight=edge.value/(max(edge.value for edge in vertex.edges)/3)+1)
+
+        # G[0][1]['color'] = 'r'
+        for i in range(len(self.stops) - 1):
+            G[self.stops[i]][self.stops[i + 1]]['color'] = 'r'
+
+        edges = G.edges()
+        colors = [G[u][v]['color'] for u,v in edges]
+        weights = [G[u][v]['weight'] for u,v in edges]
+
+        pos = nx.shell_layout(G)
+        nx.draw(G, pos, edge_color=colors, width=weights, with_labels=True)
+
+        plt.show()
 
     def initialize_greedy(self, graph: Graph):
         # Get random start point
@@ -387,5 +412,6 @@ if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
     Population(br17)
-    #test_client = Client(br17, weighting=0.07)
-    #print(test_client)
+    # test_client = Client(br17, weighting=0.07)
+    # print(test_client)
+    # test_client.show_graph(br17)
