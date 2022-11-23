@@ -146,7 +146,7 @@ class Client:
 
         return res
 
-    def show_graph(self, graph: Graph):
+    def show_graph(self, graph: Graph, generation):
         G=nx.Graph()
 
         for i, vertex in enumerate(graph.vertices):
@@ -166,9 +166,10 @@ class Client:
         weights = [G[u][v]['weight'] for u,v in edges]
 
         pos = nx.shell_layout(G)
+        plt.figure(generation)
+        fig_manager = plt.get_current_fig_manager()
+        fig_manager.set_window_title(f"Generation {generation}")
         nx.draw(G, pos, edge_color=colors, width=weights, with_labels=True)
-
-        plt.show()
 
     def initialize_greedy(self, graph: Graph):
         # Get random start point
@@ -308,11 +309,12 @@ def sort_filter(c: Client):
 
 
 class Population:
-    def __init__(self, graph: Graph):
+    def __init__(self, graph: Graph, show_graphs: bool):
         t0 = time.time()
         self.top_dog: Client
         self.graph = graph
         self.current_generation = 1
+        self.show_graphs = show_graphs
         self.clients = []
         for x in range(POP_SIZE):
             temp = Client(graph, weighting=random.random())
@@ -333,6 +335,8 @@ class Population:
         res += f"Time required for generation: \033[91m{self.gen_time} ms\033[00m\n\n"
         res += f"Survivors of this generation\n_________________________________________________________\n\n"
         res += f"Fittest individual:\n\033[92m{self.top_dog}\033[00m\n\n"
+        if self.show_graphs:
+            self.top_dog.show_graph(self.graph, self.current_generation)
         if SURVIVORS > 1:
             res += "Others:\n"
             for i in range(SURVIVORS - 1):
@@ -414,7 +418,8 @@ class Population:
 if __name__ == "__main__":
     br17 = initXML("br17.xml")
     print(br17)
-    Population(br17)
+    Population(br17, True)
+    plt.show()
     # test_client = Client(br17, weighting=0.07)
     # print(test_client)
     # test_client.show_graph(br17)
