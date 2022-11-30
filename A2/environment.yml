@@ -1,0 +1,13 @@
+name: kipraktikum2
+dependencies:
+  - python=3.8.5
+  - numpy
+  - matplotlib
+  - pip
+  - seaborn
+  - scikit-learn
+  - jupyter
+  - pandas
+  - pip:
+    - tensorflow
+    - optuna
