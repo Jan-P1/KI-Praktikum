@@ -31,6 +31,8 @@ class KalmanFilter:
         """
 
         self.delta_seconds = delta_seconds
+        self.velocity_x = 0
+        self.velocity_y = 0
 
         # ****************************************************************
         # 1. Define the state vector of the car
@@ -59,7 +61,7 @@ class KalmanFilter:
         # ****************************************************************
         # The R matrix indicates the inaccuracy of our measurement vector y.
         # TODO: Add the variance for the measurement noise of each sensor.
-        self.R = np.diag([gps_stddev_x, gps_stddev_y, imu_stddev, imu_stddev])
+        self.R = np.diag([gps_stddev_x**2, gps_stddev_y**2, imu_stddev**2, imu_stddev**2])
 
         # ****************************************************************
         # 5. The process noise matrix
@@ -107,6 +109,12 @@ class KalmanFilter:
             The estimated state of the car.
         """
 
+        # Calculate the Velocity from the acceleration value provided by the IMU and replace the value in the state vec
+        self.velocity_x += y[2] * self.delta_seconds
+        y[2] = self.velocity_x
+        self.velocity_y += y[3] * self.delta_seconds
+        y[3] = self.velocity_y
+
         # Prediction step
         # TODO: Implement the prediction step. Update x with the motion model and calculate P.
         x_pred = dot(self.A, self.x)
@@ -114,22 +122,22 @@ class KalmanFilter:
         # Correction step
         # TODO: Implement the Correction step. Correct the prediction with the measurements.
         # Calculate the Kalman gain matrix K
-        K = P_pred @ self.C.T @ inv(self.C @ P_pred @ self.C.T + self.R)
+        self.K = P_pred @ self.C.T @ inv(self.C @ P_pred @ self.C.T + self.R)
         # Update the state estimate x and the error covariance matrix P
-        self.x = x_pred + K @ (y - self.C @ x_pred)
-        self.P = P_pred - K @ self.C @ P_pred
+        self.x = x_pred + self.K @ (y - self.C @ x_pred)
+        self.P = P_pred - self.K @ self.C @ P_pred
 
         # Calculate the Kalman gain
-        K = dot(P_pred, self.C.T)
-        K = dot(K, inv(dot(self.C, P_pred) + self.R))
+        # self.K = dot(P_pred, self.C.T)
+        # self.K = dot(self.K, inv(dot(self.C, P_pred) + self.R))
 
 
         # Update the state estimate
-        self.x = x_pred + dot(K, y - dot(self.C, x_pred))
+        # self.x = x_pred + dot(self.K, y - dot(self.C, x_pred))
 
         # Update the error covariance
-        I = np.identity(len(self.x))
-        self.P = dot((I - dot(K, self.C)), P_pred)
+        # I = np.identity(len(self.x))
+        # self.P = dot((I - dot(self.K, self.C)), P_pred)
 
         return self.x
 
@@ -142,7 +150,7 @@ if __name__ == '__main__':
     imu_lin = manager.get_imu_lin_acceleration().to_numpy_array()
 
     initial_state = np.array([gps_pos[0], gps_pos[1], imu_lin[0], imu_lin[1]])
-    kalman = KalmanFilter(x=initial_state, delta_seconds=0.5, gps_stddev_x=manager.get_gps_x_stddev(),
+    kalman = KalmanFilter(x=initial_state, delta_seconds=0.1, gps_stddev_x=manager.get_gps_x_stddev(),
                           gps_stddev_y=manager.get_gps_y_stddev(), imu_stddev=manager.get_imu_accelerator_stddev())
 
     active = True
