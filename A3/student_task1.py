@@ -85,7 +85,7 @@ class KalmanFilter:
         # The Q matrix has the same dimension as the P and A matrix.
         # TODO: Test with different values. What influence does the Q-Matrix have on the estimation of the Kalman Filter?
         # TODO: Q = np.diag([variance for state1, variance for state2, ...])
-        self.Q = np.diag([.33, .33, .1, .1]) # [gps_stddev_x**2, gps_stddev_y**2, imu_stddev**2, imu_stddev**2])
+        self.Q = np.diag([.05, .05, .05, .05]) # [gps_stddev_x**2, gps_stddev_y**2, imu_stddev**2, imu_stddev**2])
 
         # ****************************************************************
         # 6. The initial error covariance matrix P
@@ -170,7 +170,6 @@ if __name__ == '__main__':
         ctrl_in = np.array([imu_acceleration[0], imu_acceleration[1]])
         state_vector = np.array([gps_position[0], gps_position[1], gps_velocity[0], gps_velocity[1]]).T
         kal_est_vec = kalman.update(state_vector, ctrl_in)
-        print(manager.get_control_input())
 
         # Update car state
         active = manager.update(kal_est_vec[0], kal_est_vec[1], kal_est_vec[2], kal_est_vec[3])
