@@ -1,4 +1,4 @@
 # KI-Team-16
 
-##Praktikumspartner:
+## Praktikumspartner:
 <https://github.com/Coocys>, <https://github.com/kise948>
